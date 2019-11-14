@@ -199,6 +199,7 @@ int main(int argc, char *argv[])
 	while(1)
 	{
 		u32 heldCnt = 0;
+		bool firstFramePassed = false;
 		while(1)
 		{
 			printf("\x1b[2J");
@@ -211,7 +212,7 @@ int main(int argc, char *argv[])
 			VIDEO_WaitVSync();
 			u32 btns = PAD_ButtonsDown(0);
 			u32 btnsHeld = PAD_ButtonsHeld(0);
-			if(btns & PAD_BUTTON_A)
+			if((btns & PAD_BUTTON_A) && firstFramePassed)
 				break;
 			else if((btns & PAD_BUTTON_RIGHT) || ((btnsHeld & PAD_BUTTON_RIGHT) && heldCnt > 30))
 			{
@@ -232,6 +233,7 @@ int main(int argc, char *argv[])
 			while(i < 0) i += gbCnt;
 			i = i%gbCnt;
 			if ((btnsHeld & PAD_BUTTON_RIGHT) || (btnsHeld & PAD_BUTTON_LEFT) || (btnsHeld & PAD_BUTTON_UP) || (btnsHeld & PAD_BUTTON_DOWN)) heldCnt++; else heldCnt = 0;
+			firstFramePassed = true;
 			if(btns & PAD_BUTTON_START)
 			{
 				printf("Exit...\n");
@@ -256,7 +258,7 @@ int main(int argc, char *argv[])
 				alreadyChosenFlag = true;
 			}
 		}
-		if(alreadyChosenFlag == true)
+		if(alreadyChosenFlag)
 		{
 			printf("This game has already been chosen!\n");
 			VIDEO_WaitVSync();
@@ -266,7 +268,8 @@ int main(int argc, char *argv[])
 		}
 		if(gbSize+uploadSize > availableRAM)
 		{
-			printf("ROM too big for GBA RAM!\n");
+			if (gbSize+goomba_gba_size > availableRAM) printf("ROM too big for GBA RAM!\n");
+			else printf("ROM too big for remaining RAM!\n");
 			VIDEO_WaitVSync();
 			sleep(2);
 			fclose(f);
@@ -288,7 +291,7 @@ int main(int argc, char *argv[])
 		{
 			bool backToGameSelection = false;
 			bool canAddAnotherGame = remainingKB > 0;
-			if(canAddAnotherGame == true)
+			if(canAddAnotherGame)
 			{
 				printf("%d KB remaining. Add another ROM? (A=Yes, B=No)\n", remainingKB);
 			}
@@ -297,12 +300,12 @@ int main(int argc, char *argv[])
 				printf("%d KB remaining. Press B to copy selected ROMs to GBA.\n", remainingKB);
 			}
 			VIDEO_WaitVSync();
-			sleep(1);
+			// sleep(1);
 			while(1)
 			{
 				PAD_ScanPads();
 				u32 btns = PAD_ButtonsDown(0);
-				if((btns & PAD_BUTTON_A) && canAddAnotherGame == true)
+				if((btns & PAD_BUTTON_A) && canAddAnotherGame)
 				{
 					backToGameSelection = true;
 					break;
@@ -312,9 +315,9 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
-			if(backToGameSelection == true)
+			if(backToGameSelection)
 			{
-				sleep(1);
+				// sleep(1);
 				continue;
 			}
 		}
